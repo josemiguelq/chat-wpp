@@ -1,5 +1,6 @@
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { ChatAnthropic } from "@langchain/anthropic";
+import { OpenAI } from "@langchain/openai";
 import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
 import {
   ChatPromptTemplate,
@@ -71,6 +72,7 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
   const model = new ChatAnthropic({
     model: "claude-3-5-sonnet-20240620",
     temperature: 0,
+    apiKey: process.env.ANTHROPIC_API_KEY
   }).bindTools(tools);
 
   // Define the function that determines whether to continue or not
