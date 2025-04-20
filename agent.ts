@@ -17,9 +17,9 @@ import { z } from "zod";
 import "dotenv/config";
 
 export async function callAgent(client: MongoClient, query: string, thread_id: string) {
-  const dbName = "hr_database";
+  const dbName = "store_wpp_database";
   const db = client.db(dbName);
-  const collection = db.collection("employees");
+  const collection = db.collection("products");
 
   const GraphState = Annotation.Root({
     messages: Annotation<BaseMessage[]>({
@@ -27,9 +27,9 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
     }),
   });
 
-  const employeeLookupTool = tool(
+  const ProductLookupTool = tool(
     async ({ query, n = 10 }) => {
-      console.log("Employee lookup tool called");
+      console.log("Products lookup tool called");
 
       const dbConfig = {
         collection: collection,
@@ -41,14 +41,14 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
       const vectorStore = new MongoDBAtlasVectorSearch(
         new OpenAIEmbeddings(),
         dbConfig
-      );
-
-      const result = await vectorStore.similaritySearchWithScore(query, n);
+      );            
+      
+      const result = await vectorStore.similaritySearchWithScore(query, n);      
       return JSON.stringify(result);
     },
     {
-      name: "employee_lookup",
-      description: "Gathers employee details from the HR database",
+      name: "product_lookup",
+      description: "Gathers product details from the Store database",
       schema: z.object({
         query: z.string().describe("The search query"),
         n: z
@@ -60,7 +60,7 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
     }
   );
 
-  const tools = [employeeLookupTool];
+  const tools = [ProductLookupTool];
   const toolNode = new ToolNode<typeof GraphState.State>(tools);
 
   const model = new ChatOpenAI({
@@ -82,13 +82,13 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
     const prompt = ChatPromptTemplate.fromMessages([
       [
         "system",
-        `You are a helpful AI assistant, collaborating with other assistants. Use the provided tools to progress towards answering the question. If you are unable to fully answer, that's OK, another assistant with different tools will help where you left off. Execute what you can to make progress. If you or any of the other assistants have the final answer or deliverable, prefix your response with FINAL ANSWER so the team knows to stop. You have access to the following tools: {tool_names}.\n{system_message}\nCurrent time: {time}.`,
+        `Você é um vendedor chamado Joel e atende numa loja de venda de peças de celular no Camelodromo Box 387 e deve responder em portugues. Use the provided tools to progress towards answering the question. If you are unable to fully answer, that's OK, another assistant with different tools will help where you left off. Execute what you can to make progress. If you or any of the other assistants have the final answer or deliverable, prefix your response with FINAL ANSWER so the team knows to stop. You have access to the following tools: {tool_names}.\n{system_message}\nCurrent time: {time}.`,
       ],
       new MessagesPlaceholder("messages"),
     ]);
 
     const formattedPrompt = await prompt.formatMessages({
-      system_message: "You are helpful HR Chatbot Agent.",
+      system_message: 'Você é um vendedor que o objetivo é fechar uma venda com um ou mais produtos. Seja sucinto e retorne apenas os preços das variations (MensagemFixa). Substitua \n por una nova linha. Retorne apenas MensagemFixa sem adicionar mais nada',
       time: new Date().toISOString(),
       tool_names: tools.map((tool) => tool.name).join(", "),
       recursionLimit: 30, configurable: { thread_id: thread_id },
