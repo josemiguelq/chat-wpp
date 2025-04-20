@@ -1,6 +1,6 @@
-import { OpenAIEmbeddings } from "@langchain/openai";
-import { ChatAnthropic } from "@langchain/anthropic";
-import { OpenAI } from "@langchain/openai";
+import { OpenAIEmbeddings, ChatOpenAI } from "@langchain/openai";
+import { AgentExecutor, createOpenAIToolsAgent } from "langchain/agents";
+import { pull } from "langchain/hub";
 import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
 import {
   ChatPromptTemplate,
@@ -17,19 +17,16 @@ import { z } from "zod";
 import "dotenv/config";
 
 export async function callAgent(client: MongoClient, query: string, thread_id: string) {
-  // Define the MongoDB database and collection
   const dbName = "hr_database";
   const db = client.db(dbName);
   const collection = db.collection("employees");
 
-  // Define the graph state
   const GraphState = Annotation.Root({
     messages: Annotation<BaseMessage[]>({
       reducer: (x, y) => x.concat(y),
     }),
   });
 
-  // Define the tools for the agent to use
   const employeeLookupTool = tool(
     async ({ query, n = 10 }) => {
       console.log("Employee lookup tool called");
@@ -41,7 +38,6 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
         embeddingKey: "embedding",
       };
 
-      // Initialize vector store
       const vectorStore = new MongoDBAtlasVectorSearch(
         new OpenAIEmbeddings(),
         dbConfig
@@ -65,30 +61,23 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
   );
 
   const tools = [employeeLookupTool];
-  
-  // We can extract the state typing via `GraphState.State`
   const toolNode = new ToolNode<typeof GraphState.State>(tools);
 
-  const model = new ChatAnthropic({
-    model: "claude-3-5-sonnet-20240620",
+  const model = new ChatOpenAI({
+    modelName: "gpt-4-1106-preview", // ou "gpt-4-turbo", "gpt-3.5-turbo", etc.
     temperature: 0,
-    apiKey: process.env.ANTHROPIC_API_KEY
+    openAIApiKey: process.env.OPENAI_API_KEY,
   }).bindTools(tools);
 
-  // Define the function that determines whether to continue or not
   function shouldContinue(state: typeof GraphState.State) {
     const messages = state.messages;
     const lastMessage = messages[messages.length - 1] as AIMessage;
-
-    // If the LLM makes a tool call, then we route to the "tools" node
     if (lastMessage.tool_calls?.length) {
       return "tools";
     }
-    // Otherwise, we stop (reply to the user)
     return "__end__";
   }
 
-  // Define the function that calls the model
   async function callModel(state: typeof GraphState.State) {
     const prompt = ChatPromptTemplate.fromMessages([
       [
@@ -102,6 +91,7 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
       system_message: "You are helpful HR Chatbot Agent.",
       time: new Date().toISOString(),
       tool_names: tools.map((tool) => tool.name).join(", "),
+      recursionLimit: 30, configurable: { thread_id: thread_id },
       messages: state.messages,
     });
 
@@ -110,7 +100,6 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
     return { messages: [result] };
   }
 
-  // Define a new graph
   const workflow = new StateGraph(GraphState)
     .addNode("agent", callModel)
     .addNode("tools", toolNode)
@@ -118,14 +107,10 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
     .addConditionalEdges("agent", shouldContinue)
     .addEdge("tools", "agent");
 
-  // Initialize the MongoDB memory to persist state between graph runs
   const checkpointer = new MongoDBSaver({ client, dbName });
 
-  // This compiles it into a LangChain Runnable.
-  // Note that we're passing the memory when compiling the graph
   const app = workflow.compile({ checkpointer });
 
-  // Use the Runnable
   const finalState = await app.invoke(
     {
       messages: [new HumanMessage(query)],
@@ -133,7 +118,6 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
     { recursionLimit: 15, configurable: { thread_id: thread_id } }
   );
 
-  // console.log(JSON.stringify(finalState.messages, null, 2));
   console.log(finalState.messages[finalState.messages.length - 1].content);
 
   return finalState.messages[finalState.messages.length - 1].content;
