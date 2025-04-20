@@ -14,7 +14,6 @@ import { MongoDBSaver } from "@langchain/langgraph-checkpoint-mongodb";
 import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
 import { MongoClient } from "mongodb";
 import { z } from "zod";
-import "dotenv/config";
 
 export async function callAgent(client: MongoClient, query: string, thread_id: string) {
   const dbName = "store_wpp_database";

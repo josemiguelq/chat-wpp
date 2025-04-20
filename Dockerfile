@@ -1,25 +1,34 @@
-#Build stage
-FROM node:16-alpine AS build
+FROM node as builder
 
-WORKDIR /app
+# Create app directory
+WORKDIR /usr/src/app
 
-COPY package*.json .
-
-RUN npm install
+# Install app dependencies
+COPY package*.json ./
 
 COPY . .
 
+RUN npm install
 RUN npm run build
 
-#Production stage
-FROM node:16-alpine AS production
+RUN ls
 
-WORKDIR /app
+FROM node:slim
 
-COPY package*.json .
+ENV NODE_ENV production
+USER node
 
-RUN npm ci --only=production
+# Create app directory
+WORKDIR /usr/src/app
 
-COPY --from=build /app/dist ./dist
+# Install app dependencies
+COPY package*.json ./
+RUN npm install
 
-CMD ["node", "dist/index.js"]
+COPY --from=builder /usr/src/app/dist ./dist
+
+# Copy env
+COPY .env .env
+
+EXPOSE 8080
+CMD [ "node", "dist/index.js" ]
