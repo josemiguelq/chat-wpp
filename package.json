@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "npx ts-node index.ts",
     "build": "tsc --build",
+    "vercel-build": "rimraf dist && tsc",
     "start": "npm run build && node dist/index.js",
     "seed": "npx ts-node seed-database.ts"
   },
