@@ -27,10 +27,22 @@ async function startServer() {
       const { event, data } = req.body
       if(event == 'messages.upsert') {
         const initialMessage = data.message.conversation;
-        console.log(data.message.messageContextInfo)
+        console.log(req.body)
         const threadId = Date.now().toString(); // Simple thread ID generation
         try {
           const response = await callAgent(client, initialMessage, threadId);
+          
+          const options = {
+            method: 'POST',
+            headers: {apikey: '429683C4C977415CAAFCCE10F7D57E11', 'Content-Type': 'application/json'},
+            body: '{"number":"<string>","text":"<string>","delay":123,"quoted":{"key":{"remoteJid":"<string>","fromMe":true,"id":"<string>","participant":"<string>"},"message":{"conversation":"<string>"}},"linkPreview":true,"mentionsEveryOne":true,"mentioned":["<string>"]}'
+          };
+          
+          // fetch('https://evo.quisbert.com.br/message/sendText/e422b5ee-69f7-4e00-b9c5-35627566f1af', options)
+          //   .then(response => response.json())
+          //   .then(response => console.log(response))
+          //   .catch(err => console.error(err));
+            
           res.json({ threadId, response });
         } catch (error) {
           console.error('Error starting conversation:', error);
