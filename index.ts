@@ -35,7 +35,7 @@ async function startServer() {
 
         const threadId = Date.now().toString(); // Simple thread ID generation
         try {
-          const response = await callAgent(client, initialMessage, threadId);
+          const response = await callAgent(client, initialMessage, phoneNumber);
           
           const options = {
             method: 'POST',
