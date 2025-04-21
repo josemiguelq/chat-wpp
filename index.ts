@@ -26,15 +26,19 @@ async function startServer() {
     app.post('/chat', async (req: Request, res: Response) => {
       console.log('Webhook')
       console.log(req.body)
-      const initialMessage = req.body.message;
-      const threadId = Date.now().toString(); // Simple thread ID generation
-      try {
-        const response = await callAgent(client, initialMessage, threadId);
-        res.json({ threadId, response });
-      } catch (error) {
-        console.error('Error starting conversation:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      const { event, data } = req.body
+      if(event == 'messages.upsert') {
+        const initialMessage = data.message.conversation;
+        console.log(data.message.messageContextInfo)
+        const threadId = Date.now().toString(); // Simple thread ID generation
+        try {
+          const response = await callAgent(client, initialMessage, threadId);
+          res.json({ threadId, response });
+        } catch (error) {
+          console.error('Error starting conversation:', error);
+          res.status(500).json({ error: 'Internal server error' });
+        }
+      }      
     });
 
     // API endpoint to send a message in an existing conversation
