@@ -30,5 +30,5 @@ COPY --from=builder /usr/src/app/dist ./dist
 # Copy env
 COPY .env .env
 
-EXPOSE 8080
+EXPOSE 3001
 CMD [ "node", "dist/index.js" ]
