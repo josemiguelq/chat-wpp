@@ -31,7 +31,7 @@ async function startServer() {
         const initialMessage = data.message.conversation;
         const remoteJid = data.key.remoteJid;
         const jobId = remoteJid.split("-")[0]
-        const phoneNumber = jobId.slice(0, 4) + "9" + jobId.slice(4);
+        const phoneNumber = jobId.length === 12 ? jobId.slice(0, 4) + "9" + jobId.slice(4) : jobId;
 
         const threadId = Date.now().toString(); // Simple thread ID generation
         try {
@@ -55,7 +55,7 @@ async function startServer() {
           try {
             const res = await fetch('https://evo.quisbert.com.br/message/sendText/MiguelTest', options);
             const data = await res.json();
-            console.log(data);
+            console.log(data.response.message);
           } catch (err) {
             console.error("Erro ao enviar mensagem:", err);
           }
