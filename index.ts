@@ -46,14 +46,14 @@ async function startServer() {
             body: JSON.stringify({
               number: phoneNumber,
               text: response,
-              message: {
-                conversation: "mensagem aqui", 
-              },
+              // message: {
+              //   conversation: "mensagem aqui", 
+              // },
             }),
           };
           
           try {
-            const res = await fetch('http://evo.quisbert.com.br/message/sendText/e422b5ee-69f7-4e00-b9c5-35627566f1af', options);
+            const res = await fetch('https://evo.quisbert.com.br/message/sendText/MiguelTest', options);
             const data = await res.json();
             console.log(data);
           } catch (err) {
