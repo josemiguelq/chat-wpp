@@ -27,7 +27,7 @@ async function startServer() {
       console.log(req.body)
       console.log('-----')
       const { event, data } = req.body
-      if(event == 'messages.upsert') {
+      if(event == 'messages.upsert' && data.key.fromMe != true) {
         const initialMessage = data.message.conversation;
         const remoteJid = data.key.remoteJid;
         const jobId = remoteJid.split("-")[0]
