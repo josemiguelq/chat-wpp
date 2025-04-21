@@ -52,10 +52,7 @@ async function startServer() {
     });
 
     app.get('/health', async (req: Request, res: Response) => {
-      res.json({ status: 'ok' });
-    });
-
-    app.get('/', async (req: Request, res: Response) => {
+      console.log('WebhookHealth')
       res.json({ status: 'ok' });
     });
 
