@@ -53,7 +53,7 @@ async function startServer() {
           try {
             const res = await fetch('https://evo.quisbert.com.br/message/sendText/MiguelTest', options);
             const data = await res.json();
-            console.log(data.response.message);
+            console.log(data);
           } catch (err) {
             console.error("Erro ao enviar mensagem:", err);
           }
