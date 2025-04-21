@@ -24,8 +24,6 @@ async function startServer() {
     // API endpoint to start a new conversation
     // curl -X POST -H "Content-Type: application/json" -d '{"message": "Build a team to make an iOS app, and tell me the talent gaps."}' http://localhost:3000/chat
     app.post('/chat', async (req: Request, res: Response) => {
-      console.log('Webhook')
-      console.log(req.body)
       const { event, data } = req.body
       if(event == 'messages.upsert') {
         const initialMessage = data.message.conversation;
