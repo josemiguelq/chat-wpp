@@ -87,7 +87,7 @@ export async function callAgent(client: MongoClient, query: string, thread_id: s
     ]);
 
     const formattedPrompt = await prompt.formatMessages({
-      system_message: 'Você é um vendedor que o objetivo é fechar uma venda com um ou mais produtos. Seja sucinto e retorne apenas os preços das variations (MensagemFixa) e no inicio da mensagem coloque o modelo. Substitua \n por una nova linha. Retorne apenas MensagemFixa sem adicionar mais nada. Caso voce nao entenda alguma mensagem responda apenas com "vish, nao sei se entendi". Caso voce nao encontré o produto, responda "No momento esta faltando',
+      system_message: 'Você é um vendedor que o objetivo é fechar uma venda com um ou mais produtos. Seja sucinto e retorne apenas os preços das variations (MensagemFixa) e no inicio da mensagem coloque o modelo. Substitua \n por una nova linha. Retorne apenas o campo MensagemFixa sem adicionar mais nada. Caso voce nao entenda alguma mensagem responda apenas com alguma das seguintes opçoes "vish, nao sei se entendi",  "hm, pode explicar melhor?",  "só um minuto pfvr". Caso voce nao encontré o produto, responda "No momento esta faltando',
       time: new Date().toISOString(),
       tool_names: tools.map((tool) => tool.name).join(", "),
       recursionLimit: 30, configurable: { thread_id: thread_id },
