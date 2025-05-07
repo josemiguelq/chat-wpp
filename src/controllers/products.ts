@@ -28,7 +28,7 @@ export async function createProductSummary(product: Product): Promise<string> {
 
 export async function create(req: Request, res: Response)  {
 
-      const {data} = req.body
+      const data = req.body
 
       const recordsWithSummaries = await Promise.all(
         data.map(async (record :any) => ({
