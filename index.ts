@@ -83,7 +83,7 @@ async function startServer() {
 
     app.post('/api/products/batch', create);
 
-    app.get('api/products', list)
+    app.get('/api/products', list)
 
     app.get('/health', async (req: Request, res: Response) => {
       console.log('WebhookHealth')
