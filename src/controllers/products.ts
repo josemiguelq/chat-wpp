@@ -63,6 +63,20 @@ export async function list(req: Request, res: Response)  {
     const db = client.db("store_wpp_database");
     const collection = db.collection("products");
   
-    const products = await collection.find().toArray();
+    const products = await collection
+    .find({}, {
+      projection: {
+        model: 1,
+        type: 1,
+        stock: 1,
+        variations: 1,
+        notes: 1,
+        related_models: 1,
+        related_products: 1,
+        _id: 0,
+      }
+    })
+    .toArray();
+
     res.json(products);
 }      
