@@ -57,3 +57,12 @@ export async function create(req: Request, res: Response)  {
           }
       
     }  
+
+export async function list(req: Request, res: Response)  {
+    await client.connect();
+    const db = client.db("store_wpp_database");
+    const collection = db.collection("products");
+  
+    const products = await collection.find().toArray();
+    res.json(products);
+}      

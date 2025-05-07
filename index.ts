@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express, { Express, Request, Response } from "express";
 import { MongoClient } from "mongodb";
 import { callAgent } from './agent';
-import {create } from './src/controllers/products'
+import { create, list } from './src/controllers/products'
 
 const app: Express = express();
 app.use(express.json());
@@ -82,6 +82,8 @@ async function startServer() {
     });
 
     app.post('/api/products/batch', create);
+
+    app.get('api/products', list)
 
     app.get('/health', async (req: Request, res: Response) => {
       console.log('WebhookHealth')
