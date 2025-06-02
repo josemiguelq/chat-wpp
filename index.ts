@@ -3,9 +3,16 @@ import express, { Express, Request, Response } from "express";
 import { MongoClient } from "mongodb";
 import { callAgent } from './agent';
 import { create, list } from './src/controllers/products'
+import { register, login } from "./src/controllers/auth";
+import cors from "cors";
+
 
 const app: Express = express();
 app.use(express.json());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "*", // Use o domínio real do front em produção
+  credentials: true // se for usar cookies/autenticação
+}));
 
 // Initialize MongoDB client
 const client = new MongoClient(process.env.MONGODB_ATLAS_URI as string);
@@ -84,6 +91,10 @@ async function startServer() {
     app.post('/api/products/batch', create);
 
     app.get('/api/products', list)
+
+    app.post("/login", login);
+
+    app.post("/register", register);
 
     app.get('/health', async (req: Request, res: Response) => {
       console.log('WebhookHealth')
