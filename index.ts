@@ -99,7 +99,7 @@ async function startServer() {
     app.post("/register", register);
 
     app.get("/api/me", me);
-    app.get("/api/products/search", searchProduct);
+    app.get("/api/products/search/pos", searchProduct);
 
     app.get('/health', async (req: Request, res: Response) => {
       console.log('WebhookHealth')

@@ -102,13 +102,17 @@ export async function searchProduct(req: Request, res: Response) {
    if (req.method !== "GET") return res.status(405).end();
 
   const q = req.query.q?.toString().trim();
+
+  if (!q || typeof q !== "string") {
+    return res.status(400).json({ message: "Parâmetro de busca inválido." });
+  }
   if (!q) return res.status(400).json({ error: "Missing query" });
 
   try {    
     const products = await getProductsByQuery(q, client);
-    res.status(200).json(products);
+    return res.status(200).json(products);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    return res.status(500).json({ error: "Server error" });
   }
 }
