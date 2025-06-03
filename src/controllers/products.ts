@@ -4,7 +4,7 @@ import express, { Request, Response } from "express";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
 import { client } from './../db/connection'
-import {getProductById} from './../db/product'
+import {getProductById, getProductsByQuery} from './../db/product'
 
 export async function createProductSummary(product: Product): Promise<string> {
     return new Promise((resolve) => {    
@@ -71,6 +71,7 @@ export async function list(req: Request, res: Response)  {
         type: 1,
         stock: 1,
         variations: 1,
+        name: 1,
         notes: 1,
         related_models: 1,
         related_products: 1,
@@ -92,5 +93,22 @@ export async function getById(req: Request, res: Response) {
     res.json(product);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+}
+
+export async function searchProduct(req: Request, res: Response) {
+  console.log(req)
+  console.log('sadsas')
+   if (req.method !== "GET") return res.status(405).end();
+
+  const q = req.query.q?.toString().trim();
+  if (!q) return res.status(400).json({ error: "Missing query" });
+
+  try {    
+    const products = await getProductsByQuery(q, client);
+    res.status(200).json(products);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 }

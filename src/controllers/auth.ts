@@ -58,6 +58,33 @@ export async function login(req: Request, res: Response) {
   }
 }
 
+export async function me (req: Request, res: Response) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Token não fornecido" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await userDb.getById(decoded.userId, client);
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    });
+  } catch (err) {
+    console.log(err)
+    return res.status(401).json({ error: "Token inválido" });
+  }
+}
 
 export function verifyToken(token: string) {
     return jwt.verify(token, JWT_SECRET) as {

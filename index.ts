@@ -2,8 +2,8 @@ import 'dotenv/config';
 import express, { Express, Request, Response } from "express";
 import { MongoClient } from "mongodb";
 import { callAgent } from './agent';
-import { create, list, getById } from './src/controllers/products'
-import { register, login } from "./src/controllers/auth";
+import { create, list, getById, searchProduct } from './src/controllers/products'
+import { register, login, me } from "./src/controllers/auth";
 import cors from "cors";
 
 
@@ -97,6 +97,9 @@ async function startServer() {
     app.post("/login", login);
 
     app.post("/register", register);
+
+    app.get("/api/me", me);
+    app.get("/api/products/search", searchProduct);
 
     app.get('/health', async (req: Request, res: Response) => {
       console.log('WebhookHealth')
