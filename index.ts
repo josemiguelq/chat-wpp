@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express, { Express, Request, Response } from "express";
 import { MongoClient } from "mongodb";
 import { callAgent } from './agent';
-import { create, list } from './src/controllers/products'
+import { create, list, getById } from './src/controllers/products'
 import { register, login } from "./src/controllers/auth";
 import cors from "cors";
 
@@ -91,6 +91,8 @@ async function startServer() {
     app.post('/api/products/batch', create);
 
     app.get('/api/products', list)
+
+    app.get('/api/products/:id', getById)
 
     app.post("/login", login);
 

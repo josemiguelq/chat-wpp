@@ -4,6 +4,7 @@ import express, { Request, Response } from "express";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
 import { client } from './../db/connection'
+import {getProductById} from './../db/product'
 
 export async function createProductSummary(product: Product): Promise<string> {
     return new Promise((resolve) => {    
@@ -73,10 +74,23 @@ export async function list(req: Request, res: Response)  {
         notes: 1,
         related_models: 1,
         related_products: 1,
-        _id: 0,
+        _id: 1,
       }
     })
     .toArray();
 
     res.json(products);
 }      
+
+export async function getById(req: Request, res: Response) {
+  const { id } = req.params;
+
+  try {    
+    const product = await getProductById(id, client);    
+    if (!product) return res.status(404).json({ error: "Produto não encontrado" });
+
+    res.json(product);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+}
