@@ -24,6 +24,7 @@ export async function register(req: Request, res: Response) {
     );
 
     res.status(201).json({ insertedId: result.insertedId });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -53,6 +54,7 @@ export async function login(req: Request, res: Response) {
     const { passwordHash, ...safeUser } = user;
 
     res.json({ token, user: safeUser });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     res.status(401).json({ error: err.message });
   }

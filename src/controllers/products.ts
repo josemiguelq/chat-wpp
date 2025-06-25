@@ -91,6 +91,7 @@ export async function getById(req: Request, res: Response) {
     if (!product) return res.status(404).json({ error: "Produto não encontrado" });
 
     res.json(product);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
