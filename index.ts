@@ -4,6 +4,8 @@ import { MongoClient } from "mongodb";
 import { callAgent } from './agent';
 import { create, list, getById, searchProduct } from './src/controllers/products'
 import { register, login, me } from "./src/controllers/auth";
+import {createDebt} from './src/controllers/debt'
+import {createCustomer, listCustomersController, searchCustomerByName} from './src/controllers/customer'
 import cors from "cors";
 
 
@@ -95,11 +97,16 @@ async function startServer() {
     app.get('/api/products/:id', getById)
 
     app.post("/login", login);
-
     app.post("/register", register);
-
     app.get("/api/me", me);
+
+    app.post("/api/customers", createCustomer);
+    app.get("/api/customers", listCustomersController);
+app.get("/api/customers/search", searchCustomerByName);
+
+
     app.get("/api/products/search/pos", searchProduct);
+    app.post("/api/debts", createDebt);
 
     app.get('/health', async (req: Request, res: Response) => {
       console.log('WebhookHealth')
