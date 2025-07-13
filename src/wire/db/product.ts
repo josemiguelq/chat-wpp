@@ -6,6 +6,7 @@ const ProductSchema = z.object({
   name: z.string(),
   sku: z.string(),
   type: z.string(),
+  brand: z.string(),
   type_labels: z.array(z.string()),
   stock: z.string(),
   related_products: z.array(z.string()),

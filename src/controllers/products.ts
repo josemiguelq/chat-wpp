@@ -18,7 +18,7 @@ export async function createProductSummary(product: Product): Promise<string> {
         )
         .join("\n");
   
-      const basicInfo = `${product.model}, also known as ${aka}`;
+      const basicInfo = `${product.brand} ${product.model}, also known as ${aka}`;
       const notes = product.notes;
   
       const summary = `${basicInfo}. Related models compatibles: ${relatedModels}. MensagemFixa: ${variations}. Buy togheter: ${relatedProducts}. Note: ${notes}`;
@@ -69,6 +69,7 @@ export async function list(req: Request, res: Response)  {
       projection: {
         model: 1,
         type: 1,
+        brand: 1,
         stock: 1,
         variations: 1,
         name: 1,

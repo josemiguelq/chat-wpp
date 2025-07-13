@@ -19,7 +19,7 @@ export async function getDashboardData(req: Request, res: Response) {
       {
         $group: {
           _id: null,
-          totalSales: { $sum: "$amount" }
+          totalSales: { $sum: "$total" }
         }
       }
     ]).toArray();
@@ -30,13 +30,13 @@ export async function getDashboardData(req: Request, res: Response) {
     const topDebtorsAggregation = await debtsCollection.aggregate([
       {
         $match: {
-          status: { $ne: "paid" } // Apenas dívidas não pagas
+          totalDebt: { $gt: 0 } // Apenas dívidas pendentes
         }
       },
       {
         $group: {
           _id: "$customerId",
-          totalDebt: { $sum: "$amount" }
+          totalDebt: { $sum: "$totalDebt" }
         }
       },
       {
@@ -80,7 +80,7 @@ export async function getDashboardData(req: Request, res: Response) {
           _id: {
             $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
           },
-          amount: { $sum: "$amount" }
+          amount: { $sum: "$total" }
         }
       },
       {
