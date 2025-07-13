@@ -78,6 +78,7 @@ export async function list(req: Request, res: Response)  {
         _id: 1,
       }
     })
+    .sort({ _id: -1 })
     .toArray();
 
     res.json(products);
