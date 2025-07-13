@@ -117,3 +117,65 @@ export async function searchProduct(req: Request, res: Response) {
     return res.status(500).json({ error: "Server error" });
   }
 }
+
+export async function update(req: Request, res: Response) {
+  const { id } = req.params;
+  const productData = req.body;
+
+  try {
+    await client.connect();
+    const db = client.db("store_wpp_database");
+    const collection = db.collection("products");
+
+    // Verificar se o produto existe
+    const existingProduct = await getProductById(id, client);
+    if (!existingProduct) {
+      return res.status(404).json({ error: "Produto não encontrado" });
+    }
+
+    // Preparar dados do produto com valores padrão se necessário
+    const updatedProduct = {
+      ...productData,
+      type_labels: productData.type_labels || [],
+      related_products: productData.related_products || [],
+      related_models: productData.related_models || [],
+      variations: productData.variations || [],
+      notes: productData.notes || "",
+    };
+
+    // Remover o documento antigo do vector index
+    await collection.deleteOne({ _id: existingProduct._id });
+
+    // Gerar novo summary com os dados atualizados
+    const newSummary = await createProductSummary(updatedProduct);
+
+    // Criar o novo documento com vector index atualizado
+    const recordWithSummary = {
+      pageContent: newSummary,
+      metadata: { ...updatedProduct },
+    };
+
+    // Inserir o novo documento com vector index
+    await MongoDBAtlasVectorSearch.fromDocuments(
+      [recordWithSummary],
+      new OpenAIEmbeddings(),
+      {
+        collection,
+        indexName: "vector_index",
+        textKey: "embedding_text",
+        embeddingKey: "embedding",
+      }
+    );
+
+    console.log("Successfully updated product:", updatedProduct.model);
+    
+    res.json({ 
+      message: "Produto atualizado com sucesso", 
+      product: recordWithSummary.metadata 
+    });
+
+  } catch (err: any) {
+    console.error("Error updating product:", err);
+    res.status(500).json({ error: err.message });
+  }
+}

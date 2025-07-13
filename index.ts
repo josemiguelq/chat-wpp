@@ -2,10 +2,11 @@ import 'dotenv/config';
 import express, { Express, Request, Response } from "express";
 import { MongoClient } from "mongodb";
 import { callAgent } from './agent';
-import { create, list, getById, searchProduct } from './src/controllers/products'
+import { create, list, getById, searchProduct, update } from './src/controllers/products'
 import { register, login, me } from "./src/controllers/auth";
 import {createDebt, listPaginatedDebtsController, listPaginatedCustomerDebtsController} from './src/controllers/debt'
 import {createCustomer, listCustomersController, searchCustomerByName} from './src/controllers/customer'
+import { getDashboardData } from './src/controllers/dashboard'
 import cors from "cors";
 
 
@@ -96,9 +97,13 @@ async function startServer() {
 
     app.get('/api/products/:id', getById)
 
+    app.put('/api/products/:id', update)
+
     app.post("/login", login);
     app.post("/register", register);
     app.get("/api/me", me);
+
+    app.get("/api/dashboard", getDashboardData);
 
     app.post("/api/customers", createCustomer);
     app.get("/api/customers", listCustomersController);
