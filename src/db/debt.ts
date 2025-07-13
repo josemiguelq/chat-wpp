@@ -129,6 +129,7 @@ export async function listPaginatedCustomerDebts(customerId: string, client: Mon
         customer: { name: 1, company: 1 },
         createdAt: 1,
         total: 1,
+        totalDebt: 1,
         payments: 1,
         items: 1,
         retrievedBy: 1,
