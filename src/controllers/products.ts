@@ -60,29 +60,82 @@ export async function create(req: Request, res: Response)  {
     }  
 
 export async function list(req: Request, res: Response)  {
-    await client.connect();
-    const db = client.db("store_wpp_database");
-    const collection = db.collection("products");
-  
-    const products = await collection
-    .find({}, {
-      projection: {
-        model: 1,
-        type: 1,
-        brand: 1,
-        stock: 1,
-        variations: 1,
-        name: 1,
-        notes: 1,
-        related_models: 1,
-        related_products: 1,
-        _id: 1,
-      }
-    })
-    .sort({ _id: -1 })
-    .toArray();
+    try {
+        await client.connect();
+        const db = client.db("store_wpp_database");
+        const collection = db.collection("products");
 
-    res.json(products);
+        // Parse query parameters
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const category = req.query.category as string;
+        const name = req.query.name as string;
+
+        // Build filter object
+        const filter: any = {};
+        
+        if (category && category.trim()) {
+            filter.type = new RegExp(category.trim(), 'i');
+        }
+        
+        if (name && name.trim()) {
+            filter.$or = [
+                { name: new RegExp(name.trim(), 'i') },
+                { model: new RegExp(name.trim(), 'i') }
+            ];
+        }
+
+        // Calculate skip value for pagination
+        const skip = (page - 1) * limit;
+
+        // Get total count for pagination metadata
+        const totalCount = await collection.countDocuments(filter);
+
+        // Fetch paginated products
+        const products = await collection
+            .find(filter, {
+                projection: {
+                    model: 1,
+                    type: 1,
+                    brand: 1,
+                    stock: 1,
+                    variations: 1,
+                    name: 1,
+                    notes: 1,
+                    related_models: 1,
+                    related_products: 1,
+                    _id: 1,
+                }
+            })
+            .sort({ _id: -1 })
+            .skip(skip)
+            .limit(limit)
+            .toArray();
+
+        // Calculate pagination metadata
+        const totalPages = Math.ceil(totalCount / limit);
+        const hasNextPage = page < totalPages;
+        const hasPreviousPage = page > 1;
+
+        res.json({
+            products,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalCount,
+                limit,
+                hasNextPage,
+                hasPreviousPage
+            },
+            filters: {
+                category: category || null,
+                name: name || null
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).json({ error: "Erro ao buscar produtos" });
+    }
 }      
 
 export async function getById(req: Request, res: Response) {
