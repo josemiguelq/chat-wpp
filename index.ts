@@ -91,6 +91,30 @@ async function startServer() {
       }
     });
 
+    // Rota para testar o agent diretamente com thread_id
+    app.post('/agent/:thread_id', async (req: Request, res: Response) => {
+      const { thread_id } = req.params;
+      const { message } = req.body;
+
+      if (!message) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
+      try {
+        const response = await callAgent(client, message, thread_id);
+        
+        res.json({ 
+          thread_id, 
+          message,
+          response,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error calling agent:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+
     app.post('/api/products/batch', create);
 
     app.get('/api/products', list)
