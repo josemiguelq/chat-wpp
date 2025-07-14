@@ -181,3 +181,37 @@ export async function update(req: Request, res: Response) {
     res.status(500).json({ error: err.message });
   }
 }
+
+export async function deleteProduct(req: Request, res: Response) {
+  const { id } = req.params;
+
+  try {
+    await client.connect();
+    const db = client.db("store_wpp_database");
+    const collection = db.collection("products");
+
+    // Verificar se o produto existe
+    const existingProduct = await getProductById(id, client);
+    if (!existingProduct) {
+      return res.status(404).json({ error: "Produto não encontrado" });
+    }
+
+    // Deletar o produto
+    const result = await collection.deleteOne({ _id: existingProduct._id });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Produto não encontrado" });
+    }
+
+    console.log("Successfully deleted product:", existingProduct.model);
+    
+    res.json({ 
+      message: "Produto deletado com sucesso", 
+      deletedId: id 
+    });
+
+  } catch (err: any) {
+    console.error("Error deleting product:", err);
+    res.status(500).json({ error: err.message });
+  }
+}

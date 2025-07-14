@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express, { Express, Request, Response } from "express";
 import { MongoClient } from "mongodb";
 import { callAgent } from './agent';
-import { create, list, getById, searchProduct, update } from './src/controllers/products'
+import { create, list, getById, searchProduct, update, deleteProduct } from './src/controllers/products'
 import { register, login, me } from "./src/controllers/auth";
 import {createDebt, listPaginatedDebtsController, listPaginatedCustomerDebtsController} from './src/controllers/debt'
 import {createCustomer, listCustomersController, searchCustomerByName} from './src/controllers/customer'
@@ -122,6 +122,8 @@ async function startServer() {
     app.get('/api/products/:id', getById)
 
     app.put('/api/products/:id', update)
+    
+    app.delete('/api/products/:id', deleteProduct)
 
     app.post("/login", login);
     app.post("/register", register);
